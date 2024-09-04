@@ -9,8 +9,14 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
+from dotenv import load_dotenv
 from pathlib import Path
+
+load_dotenv()
+COGNITO_DOMAIN = os.getenv('COGNITO_DOMAIN')
+COGNITO_CLIENT_ID = os.getenv('COGNITO_CLIENT_ID')
+COGNITO_SECRET = os.getenv('COGNITO_SECRET')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,7 +43,38 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #ADD
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    # ADD Amazon Cognito
+    'allauth.socialaccount.providers.amazon_cognito',
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+SITE_ID = 1
+
+SOCIALACCOUNT_PROVIDERS = {
+    'amazon_cognito': {
+        # 'DOMAIN': '<<Cognito設定時にメモしたドメインURL>>',
+        'DOMAIN': COGNITO_DOMAIN,
+        'APP': {
+            # 'client_id': '<<Cognito設定時にメモしたアプリクラアントID>>',
+            'client_id': COGNITO_CLIENT_ID,
+            # 'secret': '<<Cognito設定時にメモしたシークレット>>',
+            'secret': COGNITO_SECRET,
+            'key': ''
+        }
+    }
+}
+
+ACCOUNT_LOGOUT_ON_GET = True
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -47,6 +84,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # ADD
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'myproject.urls'
